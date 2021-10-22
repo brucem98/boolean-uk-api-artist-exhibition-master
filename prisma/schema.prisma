@@ -1,0 +1,45 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Address {
+  id          Int          @id @default(autoincrement())
+  street      String       @db.VarChar(225)
+  city        String       @db.VarChar(225)
+  postCode    String       @db.VarChar(225)
+  exhibitions Exhibition[]
+}
+
+model Exhibition {
+  id        Int                    @id @default(autoincrement())
+  name      String                 @db.VarChar(225)
+  date      DateTime
+  address   Address                @relation(fields: [addressId], references: [id])
+  addressId Int
+  artists   ExhibitionsOnArtists[]
+}
+
+model Artist {
+  id          Int                    @id @default(autoincrement())
+  firstName   String                 @db.VarChar(225)
+  lastName    String                 @db.VarChar(225)
+  exhibitions ExhibitionsOnArtists[]
+}
+
+model ExhibitionsOnArtists {
+  exhibition   Exhibition @relation(fields: [exhibitionId], references: [id])
+  exhibitionId Int
+  artist       Artist     @relation(fields: [artistId], references: [id])
+  artistId     Int
+
+  @@id([exhibitionId, artistId])
+}
